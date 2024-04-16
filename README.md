@@ -38,7 +38,7 @@ As of now, this plugin has been tested and confirmed to work on Godot 4.2.1, as 
 Contributions to the plugin are welcome! If you have suggestions for improvements or have found a bug, please open an issue or a pull request. Also testing on other versions has not yet been conducted. If you are using a different version of Godot and would like to contribute, please feel free to test the plugin and provide feedback on compatibility with other versions.
 
 ## License
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Acknowledgements
 - Thanks to the Godot community for their continuous support and feedback.
