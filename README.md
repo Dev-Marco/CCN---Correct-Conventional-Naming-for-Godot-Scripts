@@ -8,7 +8,7 @@ This Godot Engine plugin enhances the script creation process by allowing users 
 
 ## Features
 - **Flexible Naming Conventions**: Choose between `snake_case` and `PascalCase` for your script filenames.
-- **Automatic Conversion**: Automatically converts node names to the selected naming convention when creating new scripts.
+- **Automatic Conversion**: Automatically converts script names to the selected naming convention when creating new scripts.
 - **Seamless Integration**: Provides a simple and seamless integration in the default "Attach Script to Node" dialog to switch naming conventions, preview the result and lastly apply the change.
 
 ## Installation
