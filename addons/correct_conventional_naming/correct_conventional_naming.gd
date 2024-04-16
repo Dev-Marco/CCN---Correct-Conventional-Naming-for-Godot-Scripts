@@ -285,6 +285,7 @@ func get_path_from_line_edit() -> String:
 func _apply_naming_convention() -> void:
 	get_line_edit().text = get_path_from_line_edit() + ccn_preview_line_edit.text
 	get_line_edit().select(get_path_from_line_edit().length(), get_line_edit().text.length() - get_suffix().length())
+	get_line_edit().text_changed.emit(get_line_edit().text)
 
 
 ## This function resets the selection from the OptionButton and therefore
