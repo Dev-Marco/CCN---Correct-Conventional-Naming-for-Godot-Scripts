@@ -35,6 +35,7 @@ func _enter_tree() -> void:
 
 		ccn_option_button = OptionButton.new()
 		ccn_hbox.add_child(ccn_option_button)
+		ccn_option_button.add_item('Select...')
 		ccn_option_button.add_item('snake_case')
 		ccn_option_button.add_item('PascalCase')
 		ccn_option_button.item_selected.connect(_on_conventional_naming_option_selected)
@@ -44,6 +45,7 @@ func _enter_tree() -> void:
 		ccn_hbox.add_child(ccn_apply_button)
 		ccn_apply_button.text = 'Apply'
 		ccn_apply_button.pressed.connect(apply_naming_convention)
+		ccn_apply_button.disabled = true
 		ccn_apply_button.name = 'ccn_apply_button'
 
 		ccn_preview_label = Label.new()
@@ -57,17 +59,30 @@ func _enter_tree() -> void:
 		ccn_preview_line_edit.text = get_name_from_line_edit()
 		ccn_preview_line_edit.name = 'ccn_preview_line_edit'
 
+		get_script_create_dialog().script_created.connect(_reset_selection)
+		get_script_create_dialog().confirmed.connect(_reset_selection)
+		get_script_create_dialog().canceled.connect(_reset_selection)
+
 
 func _exit_tree() -> void:
 	# Clean-up of the plugin goes here.
 	ccn_option_button.item_selected.disconnect(_on_conventional_naming_option_selected)
+	get_script_create_dialog().confirmed.disconnect(_reset_selection)
 	ccn_apply_button.pressed.disconnect(apply_naming_convention)
 
 
 func _on_conventional_naming_option_selected(index: int):
 	var selected_item: String = ccn_option_button.get_item_text(index)
+
+	if selected_item == 'Select...':
+		ccn_preview_line_edit.text = ''
+		ccn_apply_button.disabled = true
+		return
+
 	var name: String = get_name_from_line_edit(false)
 	var new_name: String = ''
+	ccn_apply_button.disabled = false
+
 	if selected_item == 'snake_case':
 		var previous_char_not_upper: bool = false
 		for i in name.length():
@@ -85,6 +100,7 @@ func _on_conventional_naming_option_selected(index: int):
 					previous_char_not_upper = false
 				new_name += char.to_lower()
 		name = new_name
+
 	elif selected_item == 'PascalCase':
 		var previous_char_was_underscore: bool = true
 		var previous_char_was_start_of_word: bool = false
@@ -131,3 +147,9 @@ func get_path_from_line_edit() -> String:
 func apply_naming_convention() -> void:
 	get_line_edit().text = get_path_from_line_edit() + ccn_preview_line_edit.text
 	get_line_edit().select(get_path_from_line_edit().length(), get_line_edit().text.length() - get_suffix().length())
+
+
+func _reset_selection() -> void:
+	ccn_option_button.select(0)
+	ccn_preview_line_edit.text = ''
+	ccn_apply_button.disabled = true
