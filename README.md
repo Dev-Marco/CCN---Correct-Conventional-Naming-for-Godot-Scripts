@@ -13,9 +13,9 @@ This Godot Engine plugin enhances the script creation process by allowing users 
 
 ## Installation
 1. Clone or download this repository.
-2. Copy the `addons/node_script_naming_convention` folder into the `addons` directory of your Godot project.
+2. Copy the `addons/correct_conventional_naming` folder into the `addons` directory of your Godot project.
 3. In Godot, go to `Project` -> `Project Settings` -> `Plugins`.
-4. Find "Node Script Naming Convention Plugin" in the list and click "Activate".
+4. Find "Correct Conventional Naming" in the list and click "Activate".
 
 ## Usage
 Once the plugin is activated, every time you attach a script to a node:
