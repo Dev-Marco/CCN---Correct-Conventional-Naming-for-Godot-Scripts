@@ -1,8 +1,5 @@
 # CCN - Correct Conventional Naming Plugin for Godot
 
-> [!NOTE]
-> Documentation and code refactoring will be coming soon. Stay tuned!
-
 ## Overview
 This Godot Engine plugin enhances the script creation process by allowing users to select a naming convention when attaching a script to a node. It specifically addresses the issue where the node's name is used by default when a script is attached to a node that is not saved as a standalone scene. The plugin provides options to quickly switch between `snake_case` and `PascalCase` naming conventions for script names.
 
