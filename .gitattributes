@@ -5,3 +5,6 @@
 /**        export-ignore
 /addons    !export-ignore
 /addons/** !export-ignore
+
+README.md export-subst
+LICENSE export-subst

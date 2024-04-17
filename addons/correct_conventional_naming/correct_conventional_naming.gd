@@ -6,6 +6,8 @@ extends EditorPlugin
 ## over again.
 var _dialog: ScriptCreateDialog
 
+var config: ConfigFile
+
 #region 1st new (spacer) row in the attach script dialog
 
 # These two separators are necessary so that the separator line spans across
@@ -34,6 +36,9 @@ var ccn_option_button: OptionButton
 ## The apply button that applies the preview to the path.
 var ccn_apply_button: Button
 
+## The info button that explains about the conversion.
+var ccn_info_button: Button
+
 #endregion
 
 #region 3rd new row in the attach script dialog
@@ -49,6 +54,8 @@ var ccn_preview_line_edit: LineEdit
 
 func _enter_tree() -> void:
 
+	config = ConfigFile.new()
+
 	# Initialization of the ScriptCreateDialog
 	_dialog = get_script_create_dialog()
 
@@ -59,89 +66,109 @@ func _enter_tree() -> void:
 	## The GridContainer that we want to add our controls to.
 	var grid: GridContainer = _dialog.get_child(0).get_child(0) as GridContainer
 
-	# The last child in the grid should be our ccn_preview_line_edit. If it is
-	# not that means we haven't added our UI elements yet. If we didn't make
-	# this check, deactivating and activating the plugin would clutter the
-	# ScriptCreateDialog with multiple clones of our UI elements.
-	if not grid.get_child(-1).name == 'ccn_preview_line_edit':
+	#region Initialize the separator row
 
-		#region Initialize the separator row
+	ccn_hseparator1 = HSeparator.new()
+	ccn_hseparator1.name = 'ccn_hseparator1'
+	ccn_hseparator1.add_to_group('ccn')
+	grid.add_child(ccn_hseparator1)
 
-		ccn_hseparator1 = HSeparator.new()
-		ccn_hseparator1.name = 'ccn_hseparator1'
-		grid.add_child(ccn_hseparator1)
+	ccn_hseparator2 = HSeparator.new()
+	ccn_hseparator2.name = 'ccn_hseparator2'
+	ccn_hseparator2.add_to_group('ccn')
+	grid.add_child(ccn_hseparator2)
 
-		ccn_hseparator2 = HSeparator.new()
-		ccn_hseparator2.name = 'ccn_hseparator2'
-		grid.add_child(ccn_hseparator2)
+	#endregion
 
-		#endregion
+	#region Initialize the selection row
+	ccn_label = Label.new()
+	ccn_label.name = 'ccn_label'
+	ccn_label.add_to_group('ccn')
+	ccn_label.text = 'Choose naming convention:'
+	grid.add_child(ccn_label)
 
-		#region Initialize the selection row
-		ccn_label = Label.new()
-		ccn_label.name = 'ccn_label'
-		ccn_label.text = 'Choose naming convention:'
-		grid.add_child(ccn_label)
+	# The ccn_hbox contains the dropdown and the apply button next to each
+	# other.
+	ccn_hbox = HBoxContainer.new()
+	ccn_hbox.name = 'ccn_hbox'
+	ccn_hbox.add_to_group('ccn')
+	grid.add_child(ccn_hbox)
 
-		# The ccn_hbox contains the dropdown and the apply button next to each
-		# other.
-		ccn_hbox = HBoxContainer.new()
-		ccn_hbox.name = 'ccn_hbox'
-		grid.add_child(ccn_hbox)
+	ccn_option_button = OptionButton.new()
+	ccn_option_button.name = 'ccn_option_button'
 
-		ccn_option_button = OptionButton.new()
+	# Adding the dropdown items.
+	ccn_option_button.add_item('Select...')  # The default item
+	ccn_option_button.add_item('snake_case')
+	ccn_option_button.add_item('PascalCase')
 
-		# Adding the dropdown items.
-		ccn_option_button.add_item('Select...')  # The default item
-		ccn_option_button.add_item('snake_case')
-		ccn_option_button.add_item('PascalCase')
+	# Connect the signal that is emitted when an item is selected to the
+	# _on_option_selected function.
+	ccn_option_button.item_selected.connect(_on_option_selected)
+	ccn_hbox.add_child(ccn_option_button)
 
-		# Connect the signal that is emitted when an item is selected to the
-		# _on_option_selected function.
-		ccn_option_button.item_selected.connect(_on_option_selected)
-		ccn_option_button.name = 'ccn_option_button'
-		ccn_hbox.add_child(ccn_option_button)
+	ccn_apply_button = Button.new()
+	ccn_apply_button.name = 'ccn_apply_button'
+	ccn_apply_button.text = 'Apply'
 
-		ccn_apply_button = Button.new()
-		ccn_apply_button.text = 'Apply'
-		# Connect the signal that is emitted when the button is pressed to the
-		# _apply_naming_convention function.
-		ccn_apply_button.pressed.connect(_apply_naming_convention)
-		# The apply is button is disabled on the default OptionButton item.
-		ccn_apply_button.disabled = true
-		ccn_apply_button.name = 'ccn_apply_button'
-		ccn_hbox.add_child(ccn_apply_button)
+	# Connect the signal that is emitted when the button is pressed to the
+	# _apply_naming_convention function.
+	ccn_apply_button.pressed.connect(_apply_naming_convention)
 
-		#endregion
+	# The apply button is disabled on the default OptionButton item.
+	ccn_apply_button.disabled = true
+	ccn_hbox.add_child(ccn_apply_button)
 
-		#region Initialize the preview row
+	ccn_info_button = Button.new()
+	ccn_info_button.name = 'ccn_info_button'
+	ccn_info_button.text = 'Info'
 
-		ccn_preview_label = Label.new()
-		ccn_preview_label.text = 'File name preview:'
-		ccn_preview_label.name = 'ccn_preview_label'
-		grid.add_child(ccn_preview_label)
+	# Connect the signal that is emitted when the button is pressed to the
+	# _show_info_dialog function.
+	ccn_info_button.pressed.connect(_show_info_dialog)
 
-		ccn_preview_line_edit = LineEdit.new()
-		# Make the ccn_preview_line_edit not editable
-		ccn_preview_line_edit.editable = false
-		ccn_preview_line_edit.name = 'ccn_preview_line_edit'
-		grid.add_child(ccn_preview_line_edit)
+	# Add a spacer to the HBoxContainer
+	ccn_hbox.add_spacer(false)
+	ccn_hbox.add_child(ccn_info_button)
 
-		#endregion
 
-		# If a script gets created reset the selection to the default item.
-		_dialog.confirmed.connect(_reset_selection)
 
-		# If the dialog is closed reset the selection to the default item.
-		_dialog.canceled.connect(_reset_selection)
+	#endregion
+
+	#region Initialize the preview row
+
+	ccn_preview_label = Label.new()
+	ccn_preview_label.name = 'ccn_preview_label'
+	ccn_preview_label.add_to_group('ccn')
+	ccn_preview_label.text = 'File name preview:'
+	grid.add_child(ccn_preview_label)
+
+	ccn_preview_line_edit = LineEdit.new()
+	ccn_preview_line_edit.name = 'ccn_preview_line_edit'
+	ccn_preview_line_edit.add_to_group('ccn')
+	# Make the ccn_preview_line_edit not editable
+	ccn_preview_line_edit.editable = false
+	grid.add_child(ccn_preview_line_edit)
+
+	#endregion
+
+	# If a script gets created reset the selection to the default item.
+	_dialog.confirmed.connect(_reset_selection)
+
+	# If the dialog is closed reset the selection to the default item.
+	_dialog.canceled.connect(_reset_selection)
 
 
 func _exit_tree() -> void:
 	# Disconnect all the signals from their callbacks
 	ccn_option_button.item_selected.disconnect(_on_option_selected)
 	ccn_apply_button.pressed.disconnect(_apply_naming_convention)
+	ccn_info_button.pressed.disconnect(_show_info_dialog)
 	_dialog.confirmed.disconnect(_reset_selection)
 	_dialog.canceled.disconnect(_reset_selection)
+
+	for node in get_tree().get_nodes_in_group('ccn'):
+		node.queue_free()
 
 
 ## This function acts as a callback for when the user makes a selection in
@@ -295,3 +322,33 @@ func _reset_selection() -> void:
 	ccn_option_button.select(0)
 	ccn_preview_line_edit.text = ''
 	ccn_apply_button.disabled = true
+
+
+func _show_info_dialog() -> void:
+
+	var addtional_message: String = ''
+	if config.load('res://addons/correct_conventional_naming/plugin.cfg') != OK:
+		addtional_message = '''Attention! The config file could not be loaded.
+			Please consider re-installing the plugin from your source.\n\n'''
+	else:
+		var version: String = config.get_value('plugin', 'version')
+		var author: String = config.get_value('plugin', 'author')
+		var description: String = config.get_value('plugin', 'description')
+		addtional_message = '''Correct Conventional Naming v%s
+			created by %s
+			Description:
+			%s\n\n''' % [version, author, description]
+
+
+	var info_dialog: AcceptDialog = AcceptDialog.new()
+	info_dialog.title = 'Info'
+	info_dialog.dialog_text = '''
+		%sAdditional Tips:
+		1.	The selection you make will help you to switch
+		the naming scheme for your script name.\n
+		2.	Please note that if your suggested name is already in PascalCase
+		and you select PascalCase the result will not be correct anymore.
+		The same goes for selecting snake_case if your the name already is in
+		snake_case.''' % addtional_message
+	_dialog.add_child(info_dialog)
+	info_dialog.popup_centered()
