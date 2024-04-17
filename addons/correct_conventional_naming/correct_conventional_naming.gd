@@ -241,8 +241,9 @@ func _on_option_selected(index: int):
 		# The full snake_case name should be constructed.
 		name = new_name
 
-	# Show the new_name on the preview with the correct suffix attached.
-	ccn_preview_line_edit.text = new_name + get_suffix()
+	# Show the new_name on the preview with the correct suffix attached
+	# and trim spaces
+	ccn_preview_line_edit.text = (new_name + get_suffix()).replace(' ', '')
 
 ## This function yields the LineEdit that contains the path the new script will
 ## be saved in, including the vanilla suggested name for the script.
